@@ -6,7 +6,7 @@ OBJECTS += $(patsubst %.c,%.o,$(wildcard src/libusb/*.c))
 OBJECTS += ../gimxcommon/src/posix/async.o
 endif
 
-CPPFLAGS += -Iinclude -I.
+CPPFLAGS += -Iinclude -I. -I../
 CFLAGS += -fPIC
 
 ifneq ($(OS),Windows_NT)
