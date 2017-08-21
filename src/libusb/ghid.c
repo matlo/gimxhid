@@ -24,7 +24,7 @@ int ghid_exit() {
  * \return the identifier of the opened device (to be used in further operations), \
  * or -1 in case of failure (e.g. bad path, device already opened).
  */
-int ghid_open_path(const char * device_path) {
+struct ghid_device * ghid_open_path(const char * device_path) {
 
     return gusbhid_open_path(device_path);
 }
@@ -38,7 +38,7 @@ int ghid_open_path(const char * device_path) {
  * \return the identifier of the opened device (to be used in further operations), \
  * or -1 in case of failure (e.g. no device found).
  */
-int ghid_open_ids(unsigned short vendor, unsigned short product) {
+struct ghid_device * ghid_open_ids(unsigned short vendor, unsigned short product) {
 
   return gusbhid_open_ids(vendor, product);
 }
@@ -51,7 +51,7 @@ int ghid_open_ids(unsigned short vendor, unsigned short product) {
  *
  * \return the hid devices
  */
-struct ghid_device * ghid_enumerate(unsigned short vendor, unsigned short product) {
+struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short product) {
 
     return gusbhid_enumerate(vendor, product);
 }
@@ -61,7 +61,7 @@ struct ghid_device * ghid_enumerate(unsigned short vendor, unsigned short produc
  *
  * \param hid_devs  the hid devices returned by hidasync_enumerate
  */
-void ghid_free_enumeration(struct ghid_device * hid_devs) {
+void ghid_free_enumeration(struct ghid_device_info * hid_devs) {
 
     gusbhid_free_enumeration(hid_devs);
 }
@@ -73,7 +73,7 @@ void ghid_free_enumeration(struct ghid_device * hid_devs) {
  *
  * \return the hid info
  */
-const s_hid_info * ghid_get_hid_info(int device) {
+const s_hid_info * ghid_get_hid_info(struct ghid_device * device) {
 
     return gusbhid_get_hid_info(device);
 }
@@ -88,7 +88,7 @@ const s_hid_info * ghid_get_hid_info(int device) {
  *
  * \return the number of bytes actually read
  */
-int ghid_read_timeout(int device, void * buf, unsigned int count, unsigned int timeout) {
+int ghid_read_timeout(struct ghid_device * device, void * buf, unsigned int count, unsigned int timeout) {
 
   return gusbhid_read_timeout(device, buf, count, timeout);
 }
@@ -104,7 +104,7 @@ int ghid_read_timeout(int device, void * buf, unsigned int count, unsigned int t
  *
  * \return 0 in case of success, or -1 in case of error
  */
-int ghid_register(int device, int user, const GHID_CALLBACKS * callbacks) {
+int ghid_register(struct ghid_device * device, void * user, const GHID_CALLBACKS * callbacks) {
     
     return gusbhid_register(device, user, callbacks);
 }
@@ -116,7 +116,7 @@ int ghid_register(int device, int user, const GHID_CALLBACKS * callbacks) {
  *
  * \return 0 in case of success, or -1 in case of error
  */
-int ghid_poll(int device) {
+int ghid_poll(struct ghid_device * device) {
 
     return gusbhid_poll(device);
 }
@@ -131,7 +131,7 @@ int ghid_poll(int device) {
  *
  * \return the number of bytes actually written (0 in case of timeout)
  */
-int ghid_write_timeout(int device, const void * buf, unsigned int count, unsigned int timeout) {
+int ghid_write_timeout(struct ghid_device * device, const void * buf, unsigned int count, unsigned int timeout) {
 
     return gusbhid_write_timeout(device, buf, count, timeout);
 }
@@ -145,7 +145,7 @@ int ghid_write_timeout(int device, const void * buf, unsigned int count, unsigne
  *
  * \return -1 in case of error, 0 in case of pending write, or the number of bytes written
  */
-int ghid_write(int device, const void * buf, unsigned int count) {
+int ghid_write(struct ghid_device * device, const void * buf, unsigned int count) {
 
     return gusbhid_write(device, buf, count);
 }
@@ -157,7 +157,7 @@ int ghid_write(int device, const void * buf, unsigned int count) {
  *
  * \return 0 in case of success, or -1 in case of failure (i.e. bad device identifier).
  */
-int ghid_close(int device) {
+int ghid_close(struct ghid_device * device) {
 
     return gusbhid_close(device);
 }

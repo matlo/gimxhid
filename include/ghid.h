@@ -9,9 +9,9 @@
 
 #include <gimxpoll/include/gpoll.h>
 
-typedef int (* GHID_READ_CALLBACK)(int user, const void * buf, int status);
-typedef int (* GHID_WRITE_CALLBACK)(int user, int status);
-typedef int (* GHID_CLOSE_CALLBACK)(int user);
+typedef int (* GHID_READ_CALLBACK)(void * user, const void * buf, int status);
+typedef int (* GHID_WRITE_CALLBACK)(void * user, int status);
+typedef int (* GHID_CLOSE_CALLBACK)(void * user);
 #ifndef WIN32
 typedef GPOLL_REGISTER_FD GHID_REGISTER_SOURCE;
 typedef GPOLL_REMOVE_FD GHID_REMOVE_SOURCE;
@@ -28,19 +28,17 @@ typedef struct {
     GHID_REMOVE_SOURCE fp_remove;     // to remove the device from event sources
 } GHID_CALLBACKS;
 
-#define GHID_MAX_DEVICES 256
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct ghid_device {
+struct ghid_device_info {
   unsigned short vendor_id;
   unsigned short product_id;
   unsigned short bcdDevice;
   int interface_number;
   char * path;
-  struct ghid_device * next;
+  struct ghid_device_info * next;
 };
 
 typedef struct {
@@ -57,19 +55,21 @@ typedef struct {
 #endif
 } s_hid_info;
 
+struct ghid_device;
+
 int ghid_init();
 int ghid_exit();
-int ghid_open_path(const char * device_path);
-int ghid_open_ids(unsigned short vendor, unsigned short product);
-struct ghid_device * ghid_enumerate(unsigned short vendor, unsigned short product);
-void ghid_free_enumeration(struct ghid_device * devs);
-const s_hid_info * ghid_get_hid_info(int device);
-int ghid_close(int device);
-int ghid_read_timeout(int device, void * buf, unsigned int count, unsigned int timeout);
-int ghid_register(int device, int user, const GHID_CALLBACKS * callbacks);
-int ghid_poll(int device);
-int ghid_write(int device, const void * buf, unsigned int count);
-int ghid_write_timeout(int device, const void * buf, unsigned int count, unsigned int timeout);
+struct ghid_device * ghid_open_path(const char * device_path);
+struct ghid_device * ghid_open_ids(unsigned short vendor, unsigned short product);
+struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short product);
+void ghid_free_enumeration(struct ghid_device_info * devs);
+const s_hid_info * ghid_get_hid_info(struct ghid_device * device);
+int ghid_close(struct ghid_device * device);
+int ghid_read_timeout(struct ghid_device * device, void * buf, unsigned int count, unsigned int timeout);
+int ghid_register(struct ghid_device * device, void * user, const GHID_CALLBACKS * callbacks);
+int ghid_poll(struct ghid_device * device);
+int ghid_write(struct ghid_device * device, const void * buf, unsigned int count);
+int ghid_write_timeout(struct ghid_device * device, const void * buf, unsigned int count, unsigned int timeout);
 
 #ifdef __cplusplus
 }

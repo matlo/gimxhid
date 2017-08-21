@@ -66,7 +66,8 @@ static struct {
 
 static int ff_index = -1;
 
-static int hid = -1;
+static struct ghid_device * device = NULL;
+
 
 static void dump(const unsigned char * packet, unsigned char length) {
 
@@ -80,7 +81,7 @@ static void dump(const unsigned char * packet, unsigned char length) {
   printf("\n");
 }
 
-int hid_read(int user __attribute__((unused)), const void * buf, int status) {
+int hid_read(void * user __attribute__((unused)), const void * buf, int status) {
 
   if (is_done()) {
     return -1;
@@ -91,7 +92,7 @@ int hid_read(int user __attribute__((unused)), const void * buf, int status) {
     return 1;
   }
 
-  int ret = ghid_poll(hid);
+  int ret = ghid_poll(device);
   if (ret < 0) {
     set_done();
     return 1;
@@ -113,7 +114,7 @@ static int hid_busy = 0;
 
 static int counter = 0;
 
-void rumble_task(int device) {
+void rumble_task() {
 
   if(rumble_index < 0) {
     return;
@@ -143,7 +144,7 @@ void rumble_task(int device) {
   }
 }
 
-void ff_task(int device) {
+void ff_task() {
 
   if(ff_index < 0) {
     return;
@@ -184,26 +185,26 @@ void ff_task(int device) {
   }
 }
 
-void hid_task(int device) {
+void hid_task() {
 
   if(is_done()) {
     return;
   }
-  rumble_task(device);
-  ff_task(device);
+  rumble_task();
+  ff_task();
 }
 
-int hid_write(int user __attribute__((unused)), int transfered __attribute__((unused))) {
+int hid_write(void * user __attribute__((unused)), int transfered __attribute__((unused))) {
 
   /*struct timeval t;
   gettimeofday(&t, NULL);
   printf("%ld.%06ld %s\n", t.tv_sec, t.tv_usec, __func__);*/
   hid_busy = 0;
-  hid_task(hid);
+  hid_task();
   return 0;
 }
 
-int hid_close(int user __attribute__((unused))) {
+int hid_close(void * user __attribute__((unused))) {
   set_done();
   return 0;
 }
@@ -223,11 +224,11 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
     exit(-1);
   }
 
-  hid = ghid_open_path(path);
+  device = ghid_open_path(path);
 
-  if (hid >= 0) {
+  if (device != NULL) {
 
-    const s_hid_info * hid_info = ghid_get_hid_info(hid);
+    const s_hid_info * hid_info = ghid_get_hid_info(device);
 
     printf("Opened device: VID 0x%04x PID 0x%04x PATH %s\n", hid_info->vendor_id, hid_info->product_id, path);
 
@@ -250,7 +251,7 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
             .fp_register = REGISTER_FUNCTION,
             .fp_remove = REMOVE_FUNCTION,
     };
-    if (ghid_register(hid, 42, &ghid_callbacks) != -1) {
+    if (ghid_register(device, NULL, &ghid_callbacks) != -1) {
 
       GTIMER_CALLBACKS timer_callbacks = {
               .fp_read = timer_read,
@@ -258,18 +259,18 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
               .fp_register = REGISTER_FUNCTION,
               .fp_remove = REMOVE_FUNCTION,
       };
-      int timer = gtimer_start(42, PERIOD, &timer_callbacks);
-      if (timer < 0) {
+      struct gtimer * timer = gtimer_start(NULL, PERIOD, &timer_callbacks);
+      if (timer == NULL) {
         set_done();
       }
 
-      hid_task(hid);
+      hid_task();
 
-      int ret = ghid_poll(hid);
+      int ret = ghid_poll(device);
       if (ret < 0) {
         set_done();
       }
-
+      
       while (!is_done() || hid_busy) {
 
         gpoll();
@@ -277,19 +278,19 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
         ++counter;
       }
 
-      if (timer >= 0) {
+      if (timer != NULL) {
         gtimer_close(timer);
       }
 
       if(rumble_index >= 0) {
-        ghid_write_timeout(hid, rumble_cmds[rumble_index].stop.data, rumble_cmds[rumble_index].stop.length, 1000);
+        ghid_write_timeout(device, rumble_cmds[rumble_index].stop.data, rumble_cmds[rumble_index].stop.length, 1000);
       }
 
       if(ff_index >= 0) {
-        ghid_write_timeout(hid, ff_cmds[ff_index].stop.data, ff_cmds[ff_index].stop.length, 1000);
+        ghid_write_timeout(device, ff_cmds[ff_index].stop.data, ff_cmds[ff_index].stop.length, 1000);
       }
 
-      ghid_close(hid);
+      ghid_close(device);
     }
   }
 
