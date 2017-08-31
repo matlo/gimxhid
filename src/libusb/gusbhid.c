@@ -903,10 +903,7 @@ static void cancel_transfers(struct ghid_device * device) {
   unsigned int i;
   for (i = 0; i < device->transfers_nb; ++i) {
 
-    if (device->transfers[i]->user_data == device) {
-
-      libusb_cancel_transfer(device->transfers[i]);
-    }
+    libusb_cancel_transfer(device->transfers[i]);
   }
 
   while (device->transfers_nb > 0) {
