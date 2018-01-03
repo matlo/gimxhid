@@ -44,7 +44,7 @@ struct ghid_device * open_path(const char * path, int print) {
                     async_set_device_type((struct async_device *) device, E_ASYNC_DEVICE_TYPE_HID);
                 } else {
                     PRINT_ERROR_ALLOC_FAILED("malloc")
-                    async_close((struct async_device *) device);
+                    ghid_close(device);
                     device = NULL;
                 }
             }
@@ -52,7 +52,7 @@ struct ghid_device * open_path(const char * path, int print) {
                 if (print) {
                     PRINT_ERROR_OTHER("HidP_GetCaps")
                 }
-                async_close((struct async_device *) device);
+                ghid_close(device);
                 device = NULL;
             }
             HidD_FreePreparsedData(preparsedData);
@@ -61,7 +61,7 @@ struct ghid_device * open_path(const char * path, int print) {
             if (print) {
                 PRINT_ERROR_OTHER("HidD_GetPreparsedData")
             }
-            async_close((struct async_device *) device);
+            ghid_close(device);
             device = NULL;
         }
     }
@@ -69,7 +69,7 @@ struct ghid_device * open_path(const char * path, int print) {
         if (print) {
             PRINT_ERROR_OTHER("HidD_GetAttributes")
         }
-        async_close((struct async_device *) device);
+        ghid_close(device);
         device = NULL;
     }
   }
@@ -116,17 +116,17 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
 			if(device != NULL) {
 			    s_hid_info * hid_info = (s_hid_info *) async_get_private((struct async_device *) device);
 			    if (hid_info == NULL) {
-			        async_close((struct async_device *) device);
+			        ghid_close(device);
 			        continue;
 			    }
 				if(vendor) {
 					if (hid_info->vendor_id != vendor) {
-						async_close((struct async_device *) device);
+						ghid_close(device);
 						continue;
 					}
 					if(product) {
 						if(hid_info->product_id != product) {
-							async_close((struct async_device *) device);
+							ghid_close(device);
 							continue;
 						}
 					}
@@ -136,7 +136,7 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
 
 				if(path == NULL) {
 					PRINT_ERROR_OTHER("strdup failed")
-	                async_close((struct async_device *) device);
+	                ghid_close(device);
 					continue;
 				}
 
@@ -144,7 +144,7 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
 		        if (ptr == NULL) {
 		            PRINT_ERROR_ALLOC_FAILED("malloc")
 		            free(path);
-                    async_close((struct async_device *) device);
+                    ghid_close(device);
 		            continue;
 		        }
 
@@ -184,9 +184,10 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
 		            }
 		        }
 
-				async_close((struct async_device *) device);
+				ghid_close(device);
 			}
 		}
+        SetupDiDestroyDeviceInfoList(info);
 	}
 
   return devs;
@@ -271,7 +272,7 @@ struct ghid_device * ghid_open_ids(unsigned short vendor, unsigned short product
           ret = device;
           break;
         }
-        async_close((struct async_device *) device);
+        ghid_close(device);
       }
     }
   }
