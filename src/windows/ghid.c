@@ -81,76 +81,76 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
   struct ghid_device_info * devs = NULL;
 
   GUID guid;
-	HidD_GetHidGuid(&guid);
+  HidD_GetHidGuid(&guid);
 
-	HDEVINFO info = SetupDiGetClassDevs(&guid, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+  HDEVINFO info = SetupDiGetClassDevs(&guid, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
-	if(info != INVALID_HANDLE_VALUE) {
-		int index;
-		for(index = 0; ; ++index) {
-			SP_DEVICE_INTERFACE_DATA iface;
-			iface.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-			if(SetupDiEnumDeviceInterfaces(info, NULL, &guid, index, &iface) == FALSE) {
-				break; //no more device
-			}
-			DWORD reqd_size;
-			if(SetupDiGetInterfaceDeviceDetail(info, &iface, NULL, 0, &reqd_size, NULL) == FALSE) {
-				if(GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-					continue;
-				}
-			}
-			SP_DEVICE_INTERFACE_DETAIL_DATA * details = calloc(reqd_size, sizeof(char));
-			if(details == NULL) {
-				PRINT_ERROR_ALLOC_FAILED("calloc")
-				continue;
-			}
-			details->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
-			if(SetupDiGetDeviceInterfaceDetail(info, &iface, details, reqd_size, NULL, NULL) == FALSE) {
-				PRINT_ERROR_GETLASTERROR("SetupDiGetDeviceInterfaceDetail")
-				free(details);
-				continue;
-			}
-			struct ghid_device * device = (struct ghid_device *) open_path(details->DevicePath, 0);
-			free(details);
+  if(info != INVALID_HANDLE_VALUE) {
+    int index;
+    for(index = 0; ; ++index) {
+      SP_DEVICE_INTERFACE_DATA iface;
+      iface.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+      if(SetupDiEnumDeviceInterfaces(info, NULL, &guid, index, &iface) == FALSE) {
+        break; //no more device
+      }
+      DWORD reqd_size;
+      if(SetupDiGetInterfaceDeviceDetail(info, &iface, NULL, 0, &reqd_size, NULL) == FALSE) {
+        if(GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+          continue;
+        }
+      }
+      SP_DEVICE_INTERFACE_DETAIL_DATA * details = calloc(reqd_size, sizeof(char));
+      if(details == NULL) {
+        PRINT_ERROR_ALLOC_FAILED("calloc")
+        continue;
+      }
+      details->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+      if(SetupDiGetDeviceInterfaceDetail(info, &iface, details, reqd_size, NULL, NULL) == FALSE) {
+        PRINT_ERROR_GETLASTERROR("SetupDiGetDeviceInterfaceDetail")
+        free(details);
+        continue;
+      }
+      struct ghid_device * device = (struct ghid_device *) open_path(details->DevicePath, 0);
+      free(details);
 
-			if(device != NULL) {
-			    s_hid_info * hid_info = (s_hid_info *) async_get_private((struct async_device *) device);
-			    if (hid_info == NULL) {
-			        ghid_close(device);
-			        continue;
-			    }
-				if(vendor) {
-					if (hid_info->vendor_id != vendor) {
-						ghid_close(device);
-						continue;
-					}
-					if(product) {
-						if(hid_info->product_id != product) {
-							ghid_close(device);
-							continue;
-						}
-					}
-				}
+      if(device != NULL) {
+          s_hid_info * hid_info = (s_hid_info *) async_get_private((struct async_device *) device);
+          if (hid_info == NULL) {
+              ghid_close(device);
+              continue;
+          }
+        if(vendor) {
+          if (hid_info->vendor_id != vendor) {
+            ghid_close(device);
+            continue;
+          }
+          if(product) {
+            if(hid_info->product_id != product) {
+              ghid_close(device);
+              continue;
+            }
+          }
+        }
 
-				char * path = strdup(async_get_path((struct async_device *) device));
+        char * path = strdup(async_get_path((struct async_device *) device));
 
-				if(path == NULL) {
-					PRINT_ERROR_OTHER("strdup failed")
-	                ghid_close(device);
-					continue;
-				}
+        if(path == NULL) {
+          PRINT_ERROR_OTHER("strdup failed")
+                  ghid_close(device);
+          continue;
+        }
 
-		        void * ptr = malloc(sizeof(*devs));
-		        if (ptr == NULL) {
-		            PRINT_ERROR_ALLOC_FAILED("malloc")
-		            free(path);
+            void * ptr = malloc(sizeof(*devs));
+            if (ptr == NULL) {
+                PRINT_ERROR_ALLOC_FAILED("malloc")
+                free(path);
                     ghid_close(device);
-		            continue;
-		        }
+                continue;
+            }
 
-		        struct ghid_device_info * dev = ptr;
+            struct ghid_device_info * dev = ptr;
 
-		        dev->path = path;
+            dev->path = path;
                 dev->vendor_id = hid_info->vendor_id;
                 dev->product_id = hid_info->product_id;
                 dev->bcdDevice = hid_info->bcdDevice;
@@ -161,34 +161,34 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
                 }
                 dev->next = NULL;
 
-		        struct ghid_device_info * current;
-		        struct ghid_device_info * previous = NULL;
-		        for (current = devs; current != NULL; current = current->next) {
-		            if (strcmp(dev->path, current->path) < 0) {
-		                if (previous != NULL) {
-		                    previous->next = dev;
-		                } else {
-		                    devs = dev;
-		                }
-		                dev->next = current;
-		                break;
-		            }
-		            previous = current;
-		        }
+            struct ghid_device_info * current;
+            struct ghid_device_info * previous = NULL;
+            for (current = devs; current != NULL; current = current->next) {
+                if (strcmp(dev->path, current->path) < 0) {
+                    if (previous != NULL) {
+                        previous->next = dev;
+                    } else {
+                        devs = dev;
+                    }
+                    dev->next = current;
+                    break;
+                }
+                previous = current;
+            }
 
-		        if (current == NULL) {
-		            if (devs == NULL) {
-		                devs = dev;
-		            } else {
-		                previous->next = dev;
-		            }
-		        }
+            if (current == NULL) {
+                if (devs == NULL) {
+                    devs = dev;
+                } else {
+                    previous->next = dev;
+                }
+            }
 
-				ghid_close(device);
-			}
-		}
+        ghid_close(device);
+      }
+    }
         SetupDiDestroyDeviceInfoList(info);
-	}
+  }
 
   return devs;
 }
@@ -241,14 +241,14 @@ struct ghid_device * ghid_open_ids(unsigned short vendor, unsigned short product
   info = SetupDiGetClassDevs(&guid, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
   if(info != INVALID_HANDLE_VALUE) {
     for(index = 0; ; ++index) {
-	    iface.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+      iface.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
       if(SetupDiEnumDeviceInterfaces(info, NULL, &guid, index, &iface) == FALSE) {
         break; //no more device
       }
       if(SetupDiGetInterfaceDeviceDetail(info, &iface, NULL, 0, &reqd_size, NULL) == FALSE) {
         if(GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
           continue;
-	      }
+        }
       }
       details = calloc(reqd_size, sizeof(char));
       if(details == NULL) {
