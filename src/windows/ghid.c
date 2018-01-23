@@ -11,6 +11,9 @@
 #include <gimxcommon/include/gerror.h>
 #include <gimxcommon/include/async.h>
 #include <gimxcommon/include/glist.h>
+#include <gimxlog/include/glog.h>
+
+GLOG_INST(GLOG_NAME)
 
 int ghid_init() {
 
@@ -136,7 +139,7 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
 
         if(path == NULL) {
           PRINT_ERROR_OTHER("strdup failed")
-                  ghid_close(device);
+          ghid_close(device);
           continue;
         }
 
@@ -144,7 +147,7 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
             if (ptr == NULL) {
                 PRINT_ERROR_ALLOC_FAILED("malloc")
                 free(path);
-                    ghid_close(device);
+                ghid_close(device);
                 continue;
             }
 

@@ -8,6 +8,7 @@
 #define GHID_H_
 
 #include <gimxpoll/include/gpoll.h>
+#include <gimxlog/include/glog.h>
 
 typedef int (* GHID_READ_CALLBACK)(void * user, const void * buf, int status);
 typedef int (* GHID_WRITE_CALLBACK)(void * user, int status);
@@ -70,6 +71,8 @@ int ghid_register(struct ghid_device * device, void * user, const GHID_CALLBACKS
 int ghid_poll(struct ghid_device * device);
 int ghid_write(struct ghid_device * device, const void * buf, unsigned int count);
 int ghid_write_timeout(struct ghid_device * device, const void * buf, unsigned int count, unsigned int timeout);
+
+GLOG_SET_LOG_LEVEL(ghid)
 
 #ifdef __cplusplus
 }

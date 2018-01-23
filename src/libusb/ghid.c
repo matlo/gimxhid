@@ -6,6 +6,8 @@
 #include <ghid.h>
 #include "gusbhid.h"
 
+GLOG_INST(GLOG_NAME)
+
 int ghid_init() {
 
     return gusbhid_init();

@@ -12,6 +12,10 @@
 
 #include <libusb-1.0/libusb.h>
 
+#include <gimxlog/include/glog.h>
+
+GLOG_GET(GLOG_NAME)
+
 #define POLLIN      0x001
 #define POLLOUT     0x004
 
@@ -506,7 +510,7 @@ static int claim_device(struct ghid_device * device, libusb_device * dev, struct
   if (hidInfo->reportDescriptorLength > 0) {
     hidInfo->reportDescriptor = calloc(hidInfo->reportDescriptorLength, sizeof(unsigned char));
     if (hidInfo->reportDescriptor == NULL) {
-      PRINT_ERROR_ALLOC_FAILED("calloc");
+      PRINT_ERROR_ALLOC_FAILED("calloc")
       return -1;
     }
     ret = libusb_control_transfer(device->devh, LIBUSB_ENDPOINT_IN | LIBUSB_RECIPIENT_INTERFACE,
@@ -734,7 +738,7 @@ struct ghid_device * gusbhid_open_path(const char * path) {
   int dev_i;
 
   if (path == NULL) {
-    PRINT_ERROR_OTHER("path is NULL");
+    PRINT_ERROR_OTHER("path is NULL")
     return NULL;
   }
 
