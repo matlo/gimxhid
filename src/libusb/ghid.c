@@ -5,6 +5,7 @@
 
 #include <ghid.h>
 #include "gusbhid.h"
+#include <gimxlog/include/glog.h>
 
 GLOG_INST(GLOG_NAME)
 
