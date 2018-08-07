@@ -571,6 +571,9 @@ struct ghid_device_info * gusbhid_enumerate(unsigned short vendor, unsigned shor
       PRINT_ERROR_LIBUSB("libusb_init", ret)
       return NULL;
   }
+#if defined(WIN32) && (LIBUSB_API_VERSION >= 0x01000106)
+  libusb_set_option(ctx, LIBUSB_OPTION_USE_USBDK);
+#endif
 
   cnt = libusb_get_device_list(ctx, &usb_devs);
   if (cnt < 0) {
@@ -675,6 +678,9 @@ struct ghid_device * gusbhid_open_ids(unsigned short vendor, unsigned short prod
       PRINT_ERROR_LIBUSB("libusb_init", ret)
       return NULL;
   }
+#if defined(WIN32) && (LIBUSB_API_VERSION >= 0x01000106)
+  libusb_set_option(ctx, LIBUSB_OPTION_USE_USBDK);
+#endif
 
   cnt = libusb_get_device_list(ctx, &devs);
   if (cnt < 0) {
@@ -749,6 +755,9 @@ struct ghid_device * gusbhid_open_path(const char * path) {
       PRINT_ERROR_LIBUSB("libusb_init", ret)
       return NULL;
   }
+#if defined(WIN32) && (LIBUSB_API_VERSION >= 0x01000106)
+  libusb_set_option(ctx, LIBUSB_OPTION_USE_USBDK);
+#endif
 
   cnt = libusb_get_device_list(ctx, &devs);
   if (cnt < 0) {
