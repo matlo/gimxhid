@@ -528,7 +528,9 @@ static int claim_device(struct ghid_device * device, libusb_device * dev, struct
     char manufacturerString[126] = "";
     ret = get_string_descriptor_ascii(device->devh, desc->iManufacturer,
         (unsigned char *) manufacturerString, sizeof(manufacturerString));
-    if (ret < 0) {
+    // LIBUSB_ERROR_PIPE means device sent a STALL packet
+    // device can have iManufacturer set but no descriptor
+    if (ret < 0 && ret != LIBUSB_ERROR_PIPE) {
       return -1;
     }
     if (ret > 0) {
@@ -540,7 +542,9 @@ static int claim_device(struct ghid_device * device, libusb_device * dev, struct
     char productString[126] = "";
     ret = get_string_descriptor_ascii(device->devh, desc->iProduct, (unsigned char *) productString,
         sizeof(productString));
-    if (ret < 0) {
+    // LIBUSB_ERROR_PIPE means device sent a STALL packet
+    // device can have iProduct set but no descriptor
+    if (ret < 0 && ret != LIBUSB_ERROR_PIPE) {
       return -1;
     }
     if (ret > 0) {
