@@ -154,15 +154,15 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
             struct ghid_device_info * dev = ptr;
 
             dev->path = path;
-                dev->vendor_id = hid_info->vendor_id;
-                dev->product_id = hid_info->product_id;
-                dev->bcdDevice = hid_info->bcdDevice;
-                dev->interface_number = -1;
-                char * interface = strstr(path, "&mi_");
-                if (interface != NULL) {
-                    sscanf(interface + 4, "%02x", &dev->interface_number);
-                }
-                dev->next = NULL;
+            dev->vendor_id = hid_info->vendor_id;
+            dev->product_id = hid_info->product_id;
+            dev->bcdDevice = hid_info->bcdDevice;
+            dev->interface_number = -1;
+            char * pinterface = strstr(path, "&mi_");
+            if (pinterface != NULL) {
+                sscanf(pinterface + 4, "%02x", &dev->interface_number);
+            }
+            dev->next = NULL;
 
             struct ghid_device_info * current;
             struct ghid_device_info * previous = NULL;
