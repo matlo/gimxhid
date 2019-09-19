@@ -22,6 +22,7 @@ NAME=$(shell basename "$(shell pwd)")
 LIBNAME=lib$(NAME)
 
 CFLAGS += -DGLOG_NAME=$(NAME)
+CXXFLAGS += -DGLOG_NAME=$(NAME)
 
 ifneq ($(OS),Windows_NT)
 LIB=$(LIBNAME).so
