@@ -46,14 +46,14 @@ struct ghid_device * open_path(const char * path, int print) {
                     async_set_read_size((struct async_device *) device, hidCapabilities.InputReportByteLength);
                     async_set_device_type((struct async_device *) device, E_ASYNC_DEVICE_TYPE_HID);
                 } else {
-                    PRINT_ERROR_ALLOC_FAILED("malloc")
+                    PRINT_ERROR_ALLOC_FAILED("malloc");
                     ghid_close(device);
                     device = NULL;
                 }
             }
             else {
                 if (print) {
-                    PRINT_ERROR_OTHER("HidP_GetCaps")
+                    PRINT_ERROR_OTHER("HidP_GetCaps");
                 }
                 ghid_close(device);
                 device = NULL;
@@ -62,7 +62,7 @@ struct ghid_device * open_path(const char * path, int print) {
         }
         else {
             if (print) {
-                PRINT_ERROR_OTHER("HidD_GetPreparsedData")
+                PRINT_ERROR_OTHER("HidD_GetPreparsedData");
             }
             ghid_close(device);
             device = NULL;
@@ -70,7 +70,7 @@ struct ghid_device * open_path(const char * path, int print) {
     }
     else {
         if (print) {
-            PRINT_ERROR_OTHER("HidD_GetAttributes")
+            PRINT_ERROR_OTHER("HidD_GetAttributes");
         }
         ghid_close(device);
         device = NULL;
@@ -104,12 +104,12 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
       }
       SP_DEVICE_INTERFACE_DETAIL_DATA * details = calloc(reqd_size, sizeof(char));
       if(details == NULL) {
-        PRINT_ERROR_ALLOC_FAILED("calloc")
+        PRINT_ERROR_ALLOC_FAILED("calloc");
         continue;
       }
       details->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
       if(SetupDiGetDeviceInterfaceDetail(info, &iface, details, reqd_size, NULL, NULL) == FALSE) {
-        PRINT_ERROR_GETLASTERROR("SetupDiGetDeviceInterfaceDetail")
+        PRINT_ERROR_GETLASTERROR("SetupDiGetDeviceInterfaceDetail");
         free(details);
         continue;
       }
@@ -138,14 +138,14 @@ struct ghid_device_info * ghid_enumerate(unsigned short vendor, unsigned short p
         char * path = strdup(async_get_path((struct async_device *) device));
 
         if(path == NULL) {
-          PRINT_ERROR_OTHER("strdup failed")
+          PRINT_ERROR_OTHER("strdup failed");
           ghid_close(device);
           continue;
         }
 
             void * ptr = malloc(sizeof(*devs));
             if (ptr == NULL) {
-                PRINT_ERROR_ALLOC_FAILED("malloc")
+                PRINT_ERROR_ALLOC_FAILED("malloc");
                 free(path);
                 ghid_close(device);
                 continue;
@@ -255,12 +255,12 @@ struct ghid_device * ghid_open_ids(unsigned short vendor, unsigned short product
       }
       details = calloc(reqd_size, sizeof(char));
       if(details == NULL) {
-        PRINT_ERROR_ALLOC_FAILED("calloc")
+        PRINT_ERROR_ALLOC_FAILED("calloc");
         continue;
       }
       details->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
       if(SetupDiGetDeviceInterfaceDetail(info, &iface, details, reqd_size, NULL, NULL) == FALSE) {
-        PRINT_ERROR_GETLASTERROR("SetupDiGetDeviceInterfaceDetail")
+        PRINT_ERROR_GETLASTERROR("SetupDiGetDeviceInterfaceDetail");
         free(details);
         details = NULL;
         continue;
