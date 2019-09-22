@@ -14,8 +14,8 @@ endif
 
 CPPFLAGS = -I../..
 
-LDFLAGS = -L../../gimxhid -L../../gimxpoll -L../../gimxlog -L../../gimxtime -L../../gimxtimer
-LDLIBS = -lgimxhid -lgimxpoll -lgimxlog -lgimxtime -lgimxtimer
+LDFLAGS = -L../../gimxhid -L../../gimxpoll -L../../gimxlog -L../../gimxtime -L../../gimxtimer -L../../gimxprio
+LDLIBS = -lgimxhid -lgimxpoll -lgimxlog -lgimxtime -lgimxtimer -lgimxprio
 
 BINS=ghid_test
 ifneq ($(OS),Windows_NT)

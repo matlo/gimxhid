@@ -6,11 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <getopt.h>
 
 #include <gimxhid/include/ghid.h>
 #include <gimxpoll/include/gpoll.h>
 #include <gimxtimer/include/gtimer.h>
 #include <gimxtime/include/gtime.h>
+#include <gimxprio/include/gprio.h>
+#include <gimxlog/include/glog.h>
 
 #include <gimxcommon/test/common.h>
 #include <gimxcommon/test/handlers.c>
@@ -20,6 +23,11 @@
 #define PERIOD 5000 //microseconds
 #define RUMBLE_PERIOD 1000000 //microseconds
 #define FF_PERIOD 80000 //microseconds
+
+static unsigned int periods = 0;
+static int quiet = 0;
+static int debug = 0;
+static int prio = 0;
 
 typedef struct {
   unsigned short length;
@@ -41,6 +49,12 @@ static struct {
     {
         .vid = 0x054c,
         .pid = 0x05c4,
+        .start = { 9, { 0x05, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00 } },
+        .stop =  { 9, { 0x05, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00 } },
+    },
+    {
+        .vid = 0x054c,
+        .pid = 0x09cc,
         .start = { 9, { 0x05, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00 } },
         .stop =  { 9, { 0x05, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00 } },
     }
@@ -105,7 +119,7 @@ int hid_read(void * user __attribute__((unused)), const void * buf, int status) 
     return 1;
   }
 
-  if (status > 0) {
+  if (status > 0 && !quiet) {
     gtime now = gtime_gettime();
     printf("%lu.%06lu ", GTIME_SECPART(now), GTIME_USECPART(now));
     printf("%s\n", __func__);
@@ -212,9 +226,52 @@ int hid_close(void * user __attribute__((unused))) {
   return 0;
 }
 
+static void usage() {
+  fprintf(stderr, "Usage: ./ghid_test [-d] [-n period_count] [-p] [-q]\n");
+  exit(EXIT_FAILURE);
+}
+
+/*
+ * Reads command-line arguments.
+ */
+static int read_args(int argc, char* argv[]) {
+
+  int opt;
+  while ((opt = getopt(argc, argv, "dn:pq")) != -1) {
+    switch (opt) {
+    case 'd':
+      debug = 1;
+      break;
+    case 'n':
+      periods = atoi(optarg);
+      break;
+    case 'p':
+      prio = 1;
+      break;
+    case 'q':
+      quiet = 1;
+      break;
+    default: /* '?' */
+      usage();
+      break;
+    }
+  }
+  return 0;
+}
+
 int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
 
   setup_handlers();
+
+  read_args(argc, argv);
+
+  if (debug) {
+    glog_set_all_levels(E_GLOG_LEVEL_DEBUG);
+  }
+
+  if (prio && gprio_init() < 0) {
+    exit(-1);
+  }
 
   if (ghid_init() < 0) {
     return -1;
@@ -279,6 +336,13 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
         gpoll();
 
         ++counter;
+
+        if (periods > 0) {
+            --periods;
+            if (periods == 0) {
+                set_done();
+            }
+        }
       }
 
       if (timer != NULL) {
@@ -298,6 +362,10 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
   }
 
   ghid_exit();
+
+  if (prio) {
+    gprio_clean();
+  }
 
   free(path);
 
