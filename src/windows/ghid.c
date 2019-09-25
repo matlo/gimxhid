@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2016 Mathieu Laurendeau <mat.lau@laposte.net>
+ Copyright (c) 2019 Mathieu Laurendeau <mat.lau@laposte.net>
  License: GPLv3
  */
 
@@ -207,28 +207,11 @@ void ghid_free_enumeration(struct ghid_device_info * devs) {
     }
 }
 
-/*
- * \brief Open a hid device.
- *
- * \param path  the path of the hid device to open.
- *
- * \return the identifier of the opened device (to be used in further operations), \
- * or -1 in case of failure (e.g. bad path, device already opened).
- */
 struct ghid_device * ghid_open_path(const char * path) {
     
   return open_path(path, 1);
 }
 
-/*
- * \brief Open a hid device.
- *
- * \param vendor   the vendor id of the hid device to open.
- * \param product  the product id of the hid device to open.
- *
- * \return the identifier of the opened device (to be used in further operations), \
- * or -1 in case of failure (e.g. no device found).
- */
 struct ghid_device * ghid_open_ids(unsigned short vendor, unsigned short product)
 {
   struct ghid_device * ret = NULL;
@@ -283,25 +266,11 @@ struct ghid_device * ghid_open_ids(unsigned short vendor, unsigned short product
   return ret;
 }
 
-/*
- * \brief Get info for a hid device.
- *
- * \param device  the identifier of the hid device
- *
- * \return the hid info
- */
 const s_hid_info * ghid_get_hid_info(struct ghid_device * device) {
 
     return (s_hid_info *) async_get_private((struct async_device *) device);
 }
 
-/*
- * \brief Close a hid device.
- *
- * \param device  the identifier of the hid device to close.
- *
- * \return 0 in case of success, or -1 in case of failure (i.e. bad device identifier).
- */
 int ghid_close(struct ghid_device * device) {
 
     free(async_get_private((struct async_device *) device));
@@ -309,31 +278,11 @@ int ghid_close(struct ghid_device * device) {
     return async_close((struct async_device *) device);
 }
 
-/*
- * \brief Read from a hid device, with a timeout. Use this function in a synchronous context.
- *
- * \param device  the identifier of the hid device
- * \param buf     the buffer where to store the data
- * \param count   the maximum number of bytes to read
- * \param timeout the maximum time to wait, in milliseconds
- *
- * \return the number of bytes actually read
- */
 int ghid_read_timeout(struct ghid_device * device, void * buf, unsigned int count, unsigned int timeout) {
 
   return async_read_timeout((struct async_device *) device, buf, count, timeout);
 }
 
-/*
- * \brief Register the device as an event source, and set the external callbacks. \
- * This function triggers an asynchronous context.
- *
- * \param device      the hid device
- * \param user        the user to pass to the external callback
- * \param callbacks   the device callbacks
- *
- * \return 0 in case of success, or -1 in case of error
- */
 int ghid_register(struct ghid_device * device, void * user, const GHID_CALLBACKS * callbacks) {
 
   ASYNC_CALLBACKS async_callbacks = {
@@ -346,33 +295,11 @@ int ghid_register(struct ghid_device * device, void * user, const GHID_CALLBACKS
   return async_register((struct async_device *) device, user, &async_callbacks);
 }
 
-/*
- * \brief Write to a hid device, with a timeout. Use this function in a synchronous context. \
- * In case of timeout, the function request the cancellation of the write operation, \
- * and _blocks_ until either the cancellation or the write operation succeeds. \
- * Therefore don't expect the timeout to be very precise.
- *
- * \param device  the identifier of the hid device
- * \param buf     the buffer containing the data to write
- * \param count   the number of bytes in buf
- * \param timeout the maximum time to wait for the completion, in seconds
- *
- * \return the number of bytes actually written (0 in case of timeout, -1 in case of error)
- */
 int ghid_write_timeout(struct ghid_device * device, const void * buf, unsigned int count, unsigned int timeout) {
 
   return async_write_timeout((struct async_device *) device, buf, count, timeout);
 }
 
-/*
- * \brief Send data to a hid device. Use this function in an asynchronous context.
- *
- * \param device  the identifier of the hid device
- * \param buf     the buffer containing the data to send
- * \param count   the maximum number of bytes to send
- *
- * \return -1 in case of error, 0 in case of pending write, or the number of bytes written
- */
 int ghid_write(struct ghid_device * device, const void * buf, unsigned int count) {
 
   return async_write((struct async_device *) device, buf, count);
