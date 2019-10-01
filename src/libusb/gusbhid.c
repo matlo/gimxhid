@@ -53,7 +53,7 @@ struct ghid_device {
   GLIST_LINK(struct ghid_device);
 };
 
-GLIST_INST(struct ghid_device, usbhid_devices);
+static GLIST_INST(struct ghid_device, usbhid_devices);
 GLIST_DESTRUCTOR(usbhid_devices, ghid_close)
 
 static unsigned int clients = 0;
