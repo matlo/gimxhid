@@ -50,10 +50,11 @@ struct ghid_device {
   struct libusb_transfer ** transfers;
   unsigned int transfers_nb;
   int closing; // do not process completed transfers when closing
-  GLIST_LINK(struct ghid_device)
+  GLIST_LINK(struct ghid_device);
 };
 
-GLIST_INST(struct ghid_device, usbhid_devices, ghid_close)
+GLIST_INST(struct ghid_device, usbhid_devices);
+GLIST_DESTRUCTOR(usbhid_devices, ghid_close)
 
 static unsigned int clients = 0;
 
