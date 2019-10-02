@@ -183,7 +183,7 @@ static struct ghid_device * add_device(const char * path, s_config * config, int
       return NULL;
   }
   device->config = *config;
-  GLIST_ADD(usbhid_devices, device)
+  GLIST_ADD(usbhid_devices, device);
   return device;
 }
 
@@ -977,7 +977,7 @@ int gusbhid_close(struct ghid_device * device) {
   free(device->config.hidInfo.manufacturerString);
   free(device->config.hidInfo.productString);
 
-  GLIST_REMOVE(usbhid_devices, device)
+  GLIST_REMOVE(usbhid_devices, device);
 
   free(device);
 
