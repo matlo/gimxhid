@@ -9,16 +9,6 @@
 
 GLOG_INST(GLOG_NAME)
 
-int ghid_init() {
-
-    return gusbhid_init();
-}
-
-int ghid_exit() {
-
-    return gusbhid_exit();
-}
-
 struct ghid_device * ghid_open_path(const char * device_path) {
 
     return gusbhid_open_path(device_path);

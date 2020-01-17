@@ -15,16 +15,6 @@
 
 GLOG_INST(GLOG_NAME)
 
-int ghid_init() {
-
-    return async_init();
-}
-
-int ghid_exit() {
-
-    return async_exit();
-}
-
 struct ghid_device * open_path(const char * path, int print) {
 
   struct ghid_device * device = (struct ghid_device *) async_open_path(path, print);

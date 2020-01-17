@@ -54,23 +54,10 @@ typedef struct {
 #endif
 } s_hid_info;
 
+/*
+ * \brief Structure representing a hid device.
+ */
 struct ghid_device;
-
-/*
- * \brief Call this function to initialize the library.
- *
- * \return 0 in case of success, -1 in case of error
- */
-int ghid_init();
-
-/*
- * \brief Call this function to release library resources. \
- * The library counts calls to ghid_init, and only releases \
- * resources when the number of calls to ghid_exit matches.
- *
- * \return 0
- */
-int ghid_exit();
 
 /*
  * \brief Open a hid device.

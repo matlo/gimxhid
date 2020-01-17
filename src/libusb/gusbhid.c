@@ -54,9 +54,6 @@ struct ghid_device {
 };
 
 static GLIST_INST(struct ghid_device, usbhid_devices);
-GLIST_DESTRUCTOR(usbhid_devices, ghid_close)
-
-static unsigned int clients = 0;
 
 #if !defined(LIBUSB_API_VERSION) && !defined(LIBUSBX_API_VERSION)
 static const char * LIBUSB_CALL libusb_strerror(enum libusb_error errcode)
@@ -69,14 +66,6 @@ static const char * LIBUSB_CALL libusb_strerror(enum libusb_error errcode)
     do { \
         if (GLOG_LEVEL(GLOG_NAME,ERROR)) { \
             fprintf(stderr, "%s:%d %s: %s failed with error: %s\n", __FILE__, __LINE__, __func__, libusbfunc, libusb_strerror(ret)); \
-        } \
-    } while (0)
-
-#define CHECK_INITIALIZED(RETVALUE) \
-    do { \
-        if (clients == 0) { \
-            PRINT_ERROR_OTHER("gusbhid_init should be called first"); \
-            return RETVALUE; \
         } \
     } while (0)
 
@@ -118,27 +107,6 @@ static void remove_transfer(struct libusb_transfer * transfer) {
       break;
     }
   }
-}
-
-int gusbhid_init() {
-
-  if (clients == UINT_MAX) {
-      PRINT_ERROR_OTHER("too many clients");
-      return -1;
-  }
-  ++clients;
-  return 0;
-}
-
-int gusbhid_exit(void) {
-
-  if (clients > 0) {
-      --clients;
-      if (clients == 0) {
-          GLIST_CLEAN_ALL(usbhid_devices, gusbhid_close)
-      }
-  }
-  return 0;
 }
 
 static char * make_path(libusb_device * dev, int interface_number, int interface_alt_setting) {
@@ -576,8 +544,6 @@ static int claim_device(struct ghid_device * device, libusb_device * dev, struct
 
 struct ghid_device_info * gusbhid_enumerate(unsigned short vendor, unsigned short product) {
 
-  CHECK_INITIALIZED(NULL);
-
   struct ghid_device_info * devs = NULL;
   struct ghid_device_info * last = NULL;
 
@@ -686,8 +652,6 @@ void gusbhid_free_enumeration(struct ghid_device_info * devs) {
 
 struct ghid_device * gusbhid_open_ids(unsigned short vendor, unsigned short product) {
 
-  CHECK_INITIALIZED(NULL);
-
   int ret = -1;
 
   static libusb_device** devs = NULL;
@@ -757,8 +721,6 @@ struct ghid_device * gusbhid_open_ids(unsigned short vendor, unsigned short prod
 }
 
 struct ghid_device * gusbhid_open_path(const char * path) {
-
-  CHECK_INITIALIZED(NULL);
 
   int ret = -1;
 

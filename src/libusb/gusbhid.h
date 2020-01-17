@@ -10,8 +10,6 @@
 
 struct ghid_device;
 
-int gusbhid_init();
-int gusbhid_exit();
 struct ghid_device * gusbhid_open_ids(unsigned short vendor, unsigned short product);
 struct ghid_device_info * gusbhid_enumerate(unsigned short vendor, unsigned short product);
 void gusbhid_free_enumeration(struct ghid_device_info * hid_devs);

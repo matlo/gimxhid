@@ -273,10 +273,6 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
     exit(-1);
   }
 
-  if (ghid_init() < 0) {
-    return -1;
-  }
-
   char * path = hid_select();
 
   if(path == NULL) {
@@ -360,8 +356,6 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
       ghid_close(device);
     }
   }
-
-  ghid_exit();
 
   if (prio) {
     gprio_clean();
