@@ -13,6 +13,7 @@
 #include <libusb-1.0/libusb.h>
 
 #include <gimxlog/include/glog.h>
+#include <gimxtime/include/gtime.h>
 
 GLOG_GET(GLOG_NAME)
 
@@ -208,6 +209,12 @@ static void usb_callback(struct libusb_transfer* transfer) {
   if(device->closing == 1 || transfer->status == LIBUSB_TRANSFER_CANCELLED) {
     remove_transfer(transfer);
     return;
+  }
+
+  if (GLOG_LEVEL(GLOG_NAME,DEBUG)) {
+    gtime now = gtime_gettime();
+    fprintf(stderr, "%lu.%06lu endpoint: 0x%02x, transfer status: %s\n",
+                  GTIME_SECPART(now), GTIME_USECPART(now), transfer->endpoint, libusb_error_name(transfer->status));
   }
 
   if (transfer->type == LIBUSB_TRANSFER_TYPE_INTERRUPT) {
